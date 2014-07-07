@@ -6,20 +6,7 @@
         $http.get('registration.csv')
             .success(function(data){
                 health.parsedForms = CSVToArray(data);
-                return;
-                var arr = health.parsedForms;
-                var headers = arr.shift();
-                health.parsedForms = [];
-                for (var i = 0; i < arr.length; i++) {
-                    var tmpObj = [];
-                    for (var j = 0; j < headers.length; j++) {
-                        tmpObj[headers[j]] = arr[i][j];
-                    };
-                    health.parsedForms.push(tmpObj);
-                };
-                console.log(health.parsedForms);
             });
-        this.rawCSV = '';
     }])
 })();
 
