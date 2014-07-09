@@ -30,29 +30,65 @@
     </div>
 
     <div class="container">
-        <!-- Example row of columns -->
-        <div class="row" style="page-break-after:always;" ng-repeat="rows in health.parsedForms">
-            <div class="col-md-12">
-                <h2>{{rows[7] + ' ' + rows[8]}}</h2>
-                <address>
-                    {{rows[9]}}<br>
-                    {{ rows[10] }}<br ng-if="rows[10]">
-                    {{ rows[11] + ', ' + rows[12] + ' ' + rows[13] }}
-                </address>
-                <ol start="0">
-                    <li ng-repeat="field in rows track by $index">
-                        {{ field }}
-                    </li>
-                </ol>
+        <div style="page-break-after:always;border: 1px solid blue" ng-repeat="student in registration.students">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h2>{{ student.name.last + ', ' + student.name.first }}</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <label>Home Address:</label>
+                    <address>
+                        {{ student.addr.home.line1 }}<br>
+                        {{ student.addr.home.line2 }}<br>
+                        {{ student.addr.home.city + ', ' + student.addr.home.state + ' ' + student.addr.home.zip }}
+                    </address>
+                </div>
+                <div class="col-xs-6">
+                    <label>Mailing Address (if different):</label>
+                    <address ng-show="student.addr.mailing.line1">
+                        {{ student.addr.mailing.line1 }}<br>
+                        {{ student.addr.mailing.line2 }}<br>
+                        {{ student.addr.mailing.city + ', ' + student.addr.mailing.state + ' ' + student.addr.mailing.zip }}
+                    </address>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                    <label>Gender:</label> {{ student.gender }}
+                </div>
+                <div class="col-xs-4">
+                    <label>Date of Birth:</label> {{ student.dateOfBirth | date : 'MM/dd/yy' }}
+                </div>
+                <div class="col-xs-4">
+                    <label>Social Security #:</label> {{ student.ssn }}
+                </div>
+                <div class="col-xs-2">
+                    <label>Age:</label> ???
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <label>Name of person student lives with:</label> {{student.livesWith.first + ' ' + student.livesWith.last}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">
+                    <label>Guardian:</label>
+                    <div>
+                        {{student.guardians[0].name.last}}
+                    </div>
+                </div>
             </div>
         </div>
-
-        <hr>
-
-        <footer>
-            <p>&copy; Learning Gate Community School 2014</p>
-        </footer>
     </div> <!-- /container -->
+    <div class="container">
+        <hr>
+        <footer>
+            <p>&copy; Learning Gate Community School <?= date("Y") ?></p>
+        </footer>
+    </div>
 
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
