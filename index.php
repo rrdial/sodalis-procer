@@ -8,7 +8,7 @@
 
     <!-- Andular.js -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
-    <script type="text/javascript" src="app/app.<?= filemtime(__FILE__) ?>.js"></script>
+    <script type="text/javascript" src="app.<?= filemtime(__DIR__ . '/app.js') ?>.js"></script>
 
     <!-- Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
