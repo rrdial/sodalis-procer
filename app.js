@@ -117,6 +117,10 @@ if (typeof String.prototype.startsWith != 'function') {
                             first:registration.parsedForms[i][7]
                             ,last:registration.parsedForms[i][8]
                         }
+                        ,entry: {
+                            number:registration.parsedForms[i][1]
+                            ,date:registration.parsedForms[i][2]
+                        }
                         ,addr: {
                             home: {
                                 line1:registration.parsedForms[i][9]
