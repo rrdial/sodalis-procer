@@ -4,38 +4,53 @@ if (typeof String.prototype.startsWith != 'function') {
     return this.slice(0, str.length) == str;
   };
 }
+if (typeof Date.prototype.calculateAge != 'function') {
+    Date.prototype.calculateAge = function () {
+        var ageDifMs = Date.now() - this.getTime();
+        var ageDate = new Date(ageDifMs); // miliseconds from epoch
+        return Math.abs(ageDate.getUTCFullYear() - 1970);
+    }
+}
 
 (function(){
     var app = angular.module('sodalisProcer', []);
 
-    app.controller('RegistrationController', ['$http', '$log', function($http, $log){
+    app.controller('RegistrationController', ['$http', '$log', '$scope', function($http, $log, $scope){
         var registration = this;
+        $scope.getFile = function () {
+            $scope.progress = 0;
+            fileReader.readAsDataUrl($scope.file, $scope)
+                .then(function(result) {
+                    $scope.imageSrc = result;
+                });
+        };
         $http.get('registration.csv')
             .success(function(data){
                 registration.parsedForms = CSVToArray(data);
-                //registration.parsedForms.shift(); // drop the title row
+                var headers = registration.parsedForms.shift(); // drop the title row
                 var students = [];
                 for (var i = 0; i < registration.parsedForms.length; i++) {
                     var guardians = [
                         {
                             name: {
-                                first:registration.parsedForms[i][84]
-                                ,last:registration.parsedForms[i][85]
+                                first:registration.parsedForms[i][54]
+                                ,last:registration.parsedForms[i][55]
                             }
-                            ,relationToStudent:(registration.parsedForms[i][86].startsWith('Other') ? registration.parsedForms[i][87] : registration.parsedForms[i][86])
+                            ,relationToStudent:(registration.parsedForms[i][56].startsWith('Other') ? registration.parsedForms[i][57] : registration.parsedForms[i][56])
                             ,addr: {
-                                line1:registration.parsedForms[i][88]
-                                ,line2:registration.parsedForms[i][89]
-                                ,city:registration.parsedForms[i][90]
-                                ,state:registration.parsedForms[i][91]
-                                ,zip:registration.parsedForms[i][92]
+                                line1:registration.parsedForms[i][58]
+                                ,line2:registration.parsedForms[i][59]
+                                ,city:registration.parsedForms[i][60]
+                                ,state:registration.parsedForms[i][61]
+                                ,zip:registration.parsedForms[i][62]
                             }
                             ,phone: {
-                                mobile:registration.parsedForms[i][93]
-                                ,home:registration.parsedForms[i][94]
-                                ,work:registration.parsedForms[i][95]
+                                mobile:registration.parsedForms[i][63]
+                                ,home:registration.parsedForms[i][64]
+                                ,work:registration.parsedForms[i][65]
                             }
-                            ,email:registration.parsedForms[i][96]
+                            ,smsOptIn:registration.parsedForms[i][64]
+                            ,email:registration.parsedForms[i][67]
                             ,employer: {
                                 name:registration.parsedForms[i][97]
                                 ,occupation:registration.parsedForms[i][98]
@@ -114,12 +129,12 @@ if (typeof String.prototype.startsWith != 'function') {
                     ];
                     students.push({ // Student 1
                         name: {
-                            first:registration.parsedForms[i][7]
-                            ,last:registration.parsedForms[i][8]
+                            first:registration.parsedForms[i][8]
+                            ,last:registration.parsedForms[i][9]
                         }
                         ,entry: {
-                            number:registration.parsedForms[i][1]
-                            ,date:registration.parsedForms[i][2]
+                            number:registration.parsedForms[i][0]
+                            ,date:registration.parsedForms[i][1]
                         }
                         ,addr: {
                             home: {
@@ -156,6 +171,8 @@ if (typeof String.prototype.startsWith != 'function') {
                             }
                         }
                         ,anyHillsboroSchool:registration.parsedForms[i][28]
+                        ,firstTimeHillsboro:registration.parsedForms[i][41]
+                        ,firstTimeLGCS:registration.parsedForms[i][6]
                         ,livesWith: {
                             first:registration.parsedForms[i][36]
                             ,last:registration.parsedForms[i][37]
@@ -165,7 +182,6 @@ if (typeof String.prototype.startsWith != 'function') {
                             ,state:registration.parsedForms[i][39]
                             ,country:registration.parsedForms[i][40]
                         }
-                        ,firstTimeHillsboro:registration.parsedForms[i][41]
                         ,relocatedFrom: {
                             city:registration.parsedForms[i][42]
                             ,county:registration.parsedForms[i][43]
@@ -337,7 +353,26 @@ if (typeof String.prototype.startsWith != 'function') {
                 $log.info(students);
                 registration.students = students;
             });
-    }])
+    }]);
+    app.directive('onReadFile', function ($parse) {
+        return {
+            restrict: 'A',
+            scope: {
+                onReadFile : "&"
+            },
+            link: function(scope, element, attrs) {
+                element.on('change', function(e) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        scope.$apply(function() {
+                           scope.onReadFile({$content:e.target.result});
+                        });
+                    };
+                    reader.readAsText((e.srcElement || e.target).files[0]);
+                });
+            }
+        };
+    });
 })();
 
 function CSVToArray( strData, strDelimiter ){
@@ -402,3 +437,61 @@ function CSVToArray( strData, strDelimiter ){
     // Return the parsed data.
     return( arrData );
 }
+
+(function (module) {
+     
+    var fileReader = function ($q, $log) {
+ 
+        var onLoad = function(reader, deferred, scope) {
+            return function () {
+                scope.$apply(function () {
+                    deferred.resolve(reader.result);
+                });
+            };
+        };
+ 
+        var onError = function (reader, deferred, scope) {
+            return function () {
+                scope.$apply(function () {
+                    deferred.reject(reader.result);
+                });
+            };
+        };
+ 
+        var onProgress = function(reader, scope) {
+            return function (event) {
+                scope.$broadcast("fileProgress",
+                    {
+                        total: event.total,
+                        loaded: event.loaded
+                    });
+            };
+        };
+ 
+        var getReader = function(deferred, scope) {
+            var reader = new FileReader();
+            reader.onload = onLoad(reader, deferred, scope);
+            reader.onerror = onError(reader, deferred, scope);
+            reader.onprogress = onProgress(reader, scope);
+            return reader;
+        };
+ 
+        var readAsDataURL = function (file, scope) {
+            var deferred = $q.defer();
+             
+            var reader = getReader(deferred, scope);         
+            reader.readAsDataURL(file);
+             
+            return deferred.promise;
+        };
+ 
+        return {
+            readAsDataUrl: readAsDataURL  
+        };
+    };
+ 
+    module.factory("fileReader",
+                   ["$q", "$log", fileReader]);
+ 
+}(angular.module("sodalisProcer")));
+
